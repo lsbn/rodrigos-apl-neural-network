@@ -62,17 +62,24 @@ initNetwork ← {
     (initWeightMatrices ⍵) (initBiasVectors ⍵)
 }
 
-⍝ this is the activation function that introduces non-linearity between the neuron layers
-leakyReLU ← {
-    ⍝ ⍺ is the leaky parameter
-    ⍝ ⍵ is the input
 
-    (⍺×⍵⌊0)+⍵⌈0
-}
+:Namespace LeakyReLU
+    leaky ← 0.1
+
+    F ← {
+        ⍝ this is the activation function that introduces non-linearity between the neuron layers
+        ⍵⌈leaky×⍵
+    }
+
+    dF ← {
+        ⍝ derivative of the leakyReLU function
+        leaky⌈×⍵
+    }
+:EndNamespace
 
 
 _forwardPass ← {
-    ⍝ ⍺⍺ is the activation function
+    ⍝ ⍺⍺ is the activation function namespace
     ⍝ ⍺ is the neural network
     ⍝ ⍵ is the input to the network
     (Ws bs) ← ⍺
@@ -82,7 +89,7 @@ _forwardPass ← {
 }
 
 _forwardStep ← {
-    ⍝ ⍺⍺ is the activation function
+    ⍝ ⍺⍺ is the activation function namespace
     ⍝ (Ws bs xs) ← ⍵ are the components for the step
     (Ws bs xs) ← ⍵
 
@@ -90,14 +97,13 @@ _forwardStep ← {
     b ← ⊃bs
     input ← ⊃⌽xs
 
-    x ← ⍺⍺ b+W+.×input
+    x ← ⍺⍺.F b+W+.×input
 
     (1↓Ws) (1↓bs) (xs,⊂x)
 }
 
 ⍝ network ← initNetwork 3 6 2
-⍝ activation ← 0.1∘leakyReLU
-⍝ network (activation _forwardPass) ⍪1 0 0
+⍝ network (LeakyReLU _forwardPass) ⍪1 0 0
 ⍝ ┌─┬──────────────┬─────────────┐
 ⍝ │1│ 0.02095352376│¯0.0975408996│
 ⍝ │0│¯0.04342650119│ 0.8419090114│
@@ -109,7 +115,6 @@ _forwardStep ← {
 
 
 :Namespace MSELoss
-
     ⍝ mean square error loss function used to evaluate how far off the output of the network is from the target
     F ← {
         ⍝ ⍺ is the expected target
@@ -126,7 +131,6 @@ _forwardStep ← {
         ⍝ ⍵ is the network output
         (≢⍵)÷⍨2×⍵-⍺
     }
-
 :EndNamespace
 
 
