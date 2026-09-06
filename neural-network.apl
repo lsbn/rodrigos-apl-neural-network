@@ -108,10 +108,10 @@ _forwardStep ← {
 ⍝ └─┴──────────────┴─────────────┘
 
 
-:Namespace MSE
+:Namespace MSELoss
 
     ⍝ mean square error loss function used to evaluate how far off the output of the network is from the target
-    loss ← {
+    F ← {
         ⍝ ⍺ is the expected target
         ⍝ ⍵ is the network output
 
@@ -120,8 +120,8 @@ _forwardStep ← {
         (≢sq)÷⍨ +/,sq
     }
 
-    lossDer ← {
-        ⍝ derivative of mseLoss
+    dF ← {
+        ⍝ derivative of the MSE loss function
         ⍝ ⍺ is the expected target
         ⍝ ⍵ is the network output
         (≢⍵)÷⍨2×⍵-⍺
