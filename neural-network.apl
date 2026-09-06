@@ -24,7 +24,7 @@ makeHistogram ← {
     ⍝ from aplcart.info
     histogram ← (↑'⎕'⍴¨⍨⌊)
 
-    nbins ← 20
+    nbins ← 21
 
     ⍝ 20 bins from -5 to +5
     bins ← 2÷⍨¯10+⍳nbins
