@@ -69,3 +69,41 @@ leakyReLU ← {
 
     (⍺×⍵⌊0)+⍵⌈0
 }
+
+
+_forwardPass ← {
+    ⍝ ⍺⍺ is the activation function
+    ⍝ ⍺ is the neural network
+    ⍝ ⍵ is the input to the network
+    (Ws bs) ← ⍺
+    (_ _ xs) ← (⍺⍺ _forwardStep⍣(≢Ws)) Ws bs (⊂⍵)
+
+    xs
+}
+
+_forwardStep ← {
+    ⍝ ⍺⍺ is the activation function
+    ⍝ (Ws bs xs) ← ⍵ are the components for the step
+    (Ws bs xs) ← ⍵
+
+    W ← ⊃Ws
+    b ← ⊃bs
+    input ← ⊃⌽xs
+
+    x ← ⍺⍺ b+W+.×input
+
+    (1↓Ws) (1↓bs) (xs,⊂x)
+}
+
+⍝ network ← initNetwork 3 6 2
+⍝ activation ← 0.1∘leakyReLU
+⍝ network (activation _forwardPass) ⍪1 0 0
+⍝ ┌─┬──────────────┬─────────────┐
+⍝ │1│ 0.02095352376│¯0.0975408996│
+⍝ │0│¯0.04342650119│ 0.8419090114│
+⍝ │0│¯0.01685866144│             │
+⍝ │ │ 0.300766094  │             │
+⍝ │ │¯0.01532197623│             │
+⍝ │ │ 0.07164327109│             │
+⍝ └─┴──────────────┴─────────────┘
+
