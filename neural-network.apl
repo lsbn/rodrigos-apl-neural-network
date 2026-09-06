@@ -61,3 +61,11 @@ initNetwork ← {
 
     (initWeightMatrices ⍵) (initBiasVectors ⍵)
 }
+
+⍝ this is the activation function that introduces non-linearity between the neuron layers
+leakyReLU ← {
+    ⍝ ⍺ is the leaky parameter
+    ⍝ ⍵ is the input
+
+    (⍺×⍵⌊0)+⍵⌈0
+}
