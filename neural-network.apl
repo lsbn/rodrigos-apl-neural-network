@@ -107,13 +107,26 @@ _forwardStep ← {
 ⍝ │ │ 0.07164327109│             │
 ⍝ └─┴──────────────┴─────────────┘
 
-⍝ mean square error loss function used to evaluate how far off the output of the network is from the target
-mseLoss ← {
-     ⍝ ⍺ is the expected target
-     ⍝ ⍵ is the network output
 
-    sq ← 2*⍨ ⍵-⍺
-    ⍝ +/, === +⌿ - this is needed because the NN outputs column vectors
-    (≢sq)÷⍨ +/,sq
- }
+:Namespace MSE
+
+    ⍝ mean square error loss function used to evaluate how far off the output of the network is from the target
+    loss ← {
+        ⍝ ⍺ is the expected target
+        ⍝ ⍵ is the network output
+
+        sq ← 2*⍨ ⍵-⍺
+        ⍝ +/, === +⌿ - this is needed because the NN outputs column vectors
+        (≢sq)÷⍨ +/,sq
+    }
+
+    lossDer ← {
+        ⍝ derivative of mseLoss
+        ⍝ ⍺ is the expected target
+        ⍝ ⍵ is the network output
+        (≢⍵)÷⍨2×⍵-⍺
+    }
+
+:EndNamespace
+
 
