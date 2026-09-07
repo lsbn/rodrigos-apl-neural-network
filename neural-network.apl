@@ -139,38 +139,38 @@ _forwardStep ← {
 ⍝ the backpropagation operator takes the network closer to the target for the specified input
 ⍝ it achieves this by taking the derivative of the whole network and then nudging the weights
 ⍝ and biases away from the derivative
-∇ network ← target (network _train_ functions) input
-    ;Ws ;bs ;xs ;activation ;loss
-    ;dWs ;dbs ;dx
-    ;W ;b ;x
+ ∇ network ← target (network _train_ functions) input
+     ;Ws ;bs ;xs ;activation ;loss
+     ;dWs ;dbs ;dx
+     ;W ;b ;x
 
-    (Ws bs) ← network
-    (activation loss) ← functions
-    xs ← network (activation _forwardPass) input
-    dWs ← dbs ← ⍬
+     (Ws bs) ← network
+     (activation loss) ← functions
+     xs ← network (activation _forwardPass) input
+     dWs ← dbs ← ⍬
 
-    dx ← target loss.dF ⊃⌽xs
-    :For (W b x) :InEach ⌽¨(Ws bs (¯1↓xs))
-       ⍝ these are derived by recursively going backwards starting from the known derivative of the loss function on the output
-       ⍝ see https://mathspp.com/blog/neural-networks-fundamentals-with-python-backpropagation#the-general-step
-       dbs ,← ⊂dx×activation.dF b+W+.×x
-       dx ← (⍉W)+.×⊃⌽dbs
-       dWs ,← ⊂(⊃⌽dbs)+.×⍉x
-    :EndFor
+     dx ← target loss.dF ⊃⌽xs
+     :For (W b x) :InEach ⌽¨(Ws bs (¯1↓xs))
+        ⍝ these are derived by recursively going backwards starting from the known derivative of the loss function on the output
+        ⍝ see https://mathspp.com/blog/neural-networks-fundamentals-with-python-backpropagation#the-general-step
+        dbs ,← ⊂dx×activation.dF b+W+.×x
+        dx ← (⍉W)+.×⊃⌽dbs
+        dWs ,← ⊂(⊃⌽dbs)+.×⍉x
+     :EndFor
 
-    network ← (Ws-0.001×⌽dWs) (bs-0.001×⌽dbs)
-∇
+     network ← (Ws-0.001×⌽dWs) (bs-0.001×⌽dbs)
+ ∇
 
-⍝    coolNetwork ← initNetwork 3 5 3
-⍝    input ← ⍪1 5 3
-⍝    target ← ⍪0 1 0
-⍝    output ← coolNetwork (LeakyReLU _forwardPass) input
-⍝    target MSELoss.F ⊃⌽output
+⍝       coolNetwork ← initNetwork 3 5 3
+⍝       input ← ⍪1 5 3
+⍝       target ← ⍪0 1 0
+⍝       output ← coolNetwork (LeakyReLU _forwardPass) input
+⍝       target MSELoss.F ⊃⌽output
 ⍝ 0.3799371011
-⍝    coolNetwork ← target (coolNetwork _train_ LeakyReLU MSELoss) input
-⍝    coolNetwork ← target (coolNetwork _train_ LeakyReLU MSELoss) input
-⍝    coolNetwork ← target (coolNetwork _train_ LeakyReLU MSELoss) input
-⍝    outputAfter ← coolNetwork (LeakyReLU _forwardPass) input
-⍝    target MSELoss.F ⊃⌽outputAfter
+⍝       coolNetwork ← target (coolNetwork _train_ LeakyReLU MSELoss) input
+⍝       coolNetwork ← target (coolNetwork _train_ LeakyReLU MSELoss) input
+⍝       coolNetwork ← target (coolNetwork _train_ LeakyReLU MSELoss) input
+⍝       outputAfterTraining ← coolNetwork (LeakyReLU _forwardPass) input
+⍝       target MSELoss.F ⊃⌽outputAfterTraining
 ⍝ 0.3797264817
 
