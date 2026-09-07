@@ -174,3 +174,68 @@ _forwardStep ← {
 ⍝       target MSELoss.F ⊃⌽outputAfterTraining
 ⍝ 0.3797264817
 
+⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝ MNIST ⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝⍝
+
+drawDigit ← {
+    ' #'[28 28⍴1↓⍵>0]
+}
+
+∇ {network} ← createMNIST (trainFile testFile)
+  ;readChunk ;splitChunk
+  ;trainTie ;testTie
+  ;chunk ;targets ;inputs ;outputs ;targetsMat
+
+  ⍝ assume the csv doesn't contain a header
+  ⍝ uses an NTIE to get the data in chunks
+  readChunk ← {⎕CSV⍠'Records' 1000⊢⍵ '' 2}
+  ⍝ the first value contains the digit
+  ⍝ the second value contains the 28×28 image
+  splitChunk ← {(⊣/⍵) (0 1↓⍵)}
+
+  ⍝ 784 input neurons, as many as the pixels, and 10 output neurons
+  ⍝ the intermediate layers structure needs to be determined by testing what works
+  network ← initNetwork 784 16 16 10
+
+  ⍝⍝⍝⍝⍝ train the network ⍝⍝⍝⍝⍝
+  ⎕ ← '== Training the network'
+  trainTie ← 0⎕NTIE⍨trainFile
+
+  :While 0<≢chunk ← readChunk trainTie
+   ⍞ ← '∘'
+   (targets inputs) ← splitChunk chunk
+   targetsMat ← targets ∘.= ⍳10
+
+   ⍝ ⍤1⊢ for each row of the inputs
+   ⍝ trainDfn⍥⍪ apply the training operator by first turning the inputs and target to column vectors
+   ⍝ ⊢← is used to update the network variable defined above from inside the dfn
+   targetsMat {network ⊢← ⍺(network _train_ LeakyReLU MSELoss)⍵}⍥⍪ ⍤1⊢inputs
+  :EndWhile
+  ⎕NUNTIE trainTie
+
+  ⍝⍝⍝⍝⍝ test the network ⍝⍝⍝⍝⍝
+  ⎕ ← '== Testing the network'
+  testTie ← 0⎕NTIE⍨testFile
+
+  outputs ← ⍬ ⍝ contains booleans that denote whether the network recognized the correct digit
+  :While 0<≢chunk ← readChunk testTie
+   ⍞ ← '∘'
+   (targets inputs) ← splitChunk chunk
+   ⍝ ⍤1⊢ is used to apply the feedforward function to each row of the inputs
+   outputs ,← targets = {⊃⍒⊃⌽network (LeakyReLU _forwardPass) ⍪⍵}⍤1⊢inputs
+  :EndWhile
+  ⎕NUNTIE testTie
+
+  ⎕ ← 'Success rate: ', (+⌿outputs)÷≢outputs
+∇
+
+⍝       createMNIST './mnist_train.csv' './mnist_test.csv'
+⍝ == Testing the network
+⍝ ∘∘∘∘∘∘∘∘∘∘
+⍝ Success rate:  0.0911
+⍝
+⍝       createMNIST './mnist_train.csv' './mnist_test.csv'
+⍝ == Training the network
+⍝ ∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘∘
+⍝ == Testing the network
+⍝ ∘∘∘∘∘∘∘∘∘∘
+⍝ Success rate:  0.9052
