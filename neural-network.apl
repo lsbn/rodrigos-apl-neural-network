@@ -102,8 +102,8 @@ _forwardStep ← {
     (1↓Ws) (1↓bs) (xs,⊂x)
 }
 
-⍝ network ← initNetwork 3 6 2
-⍝ network (LeakyReLU _forwardPass) ⍪1 0 0
+⍝     network ← initNetwork 3 6 2
+⍝     network (LeakyReLU _forwardPass) ⍪1 0 0
 ⍝ ┌─┬──────────────┬─────────────┐
 ⍝ │1│ 0.02095352376│¯0.0975408996│
 ⍝ │0│¯0.04342650119│ 0.8419090114│
@@ -133,4 +133,42 @@ _forwardStep ← {
     }
 :EndNamespace
 
+
+⍝ the backpropagation operator takes the network closer to the target for the specified input
+⍝ it achieves this by taking the derivative of the whole network and then nudging the weights
+⍝ and biases away from the derivative
+∇ network ← target (network _train_ functions) input
+    ;Ws ;bs ;xs ;activation ;loss
+    ;dWs ;dbs ;dx
+    ;W ;b ;x
+
+    (Ws bs) ← network
+    (activation loss) ← functions
+    xs ← network (activation _forwardPass) input
+    dWs ← dbs ← ⍬
+
+    dx ← target loss.dF ⊃⌽xs
+    :For (W b x) :InEach ⌽¨(Ws bs (¯1↓xs))
+       ⍝ these are derived by recursively going backwards starting from the known derivative of the loss function on the output
+       ⍝ see https://mathspp.com/blog/neural-networks-fundamentals-with-python-backpropagation#the-general-step
+       dbs ,← ⊂dx×activation.dF b+W+.×x
+       dx ← (⍉W)+.×⊃⌽dbs
+       dWs ,← ⊂(⊃⌽dbs)+.×⍉x
+    :EndFor
+
+    network ← (Ws-0.001×⌽dWs) (bs-0.001×⌽dbs)
+∇
+
+⍝    coolNetwork ← initNetwork 3 5 3
+⍝    input ← ⍪1 5 3
+⍝    target ← ⍪0 1 0
+⍝    output ← coolNetwork (LeakyReLU _forwardPass) input
+⍝    target MSELoss.F ⊃⌽output
+⍝ 0.3799371011
+⍝    coolNetwork ← target (coolNetwork _train_ LeakyReLU MSELoss) input
+⍝    coolNetwork ← target (coolNetwork _train_ LeakyReLU MSELoss) input
+⍝    coolNetwork ← target (coolNetwork _train_ LeakyReLU MSELoss) input
+⍝    outputAfter ← coolNetwork (LeakyReLU _forwardPass) input
+⍝    target MSELoss.F ⊃⌽outputAfter
+⍝ 0.3797264817
 
