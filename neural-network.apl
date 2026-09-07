@@ -1,3 +1,5 @@
+⎕IO ← 0
+
 randomArray ← {?⍵⍴0}
 
 ⍝ the box-muller transform is used to generate normally distributed random numbers from uniformly distributed numbers
